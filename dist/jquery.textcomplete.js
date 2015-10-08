@@ -310,10 +310,7 @@ if (typeof jQuery === 'undefined') {
         }
         self.dropdown.setPosition(self.adapter.getCaretPosition());
         self.dropdown.render(self._zip(data, strategy, term));
-				
-				// fire drawn event so we can tweak position ourselves
-				self.completer.fire('textComplete:drawn', self.$el);
-				
+
         if (!stillSearching) {
           // The last callback in the current lock.
           free();
@@ -793,6 +790,11 @@ if (typeof jQuery === 'undefined') {
 					this.$el.offset({top: windowScrollBottom - height});
 				}
       }
+			
+						
+			// fire drawn event so we can tweak position ourselves
+			this.completer.fire('textComplete:afterPosition', this.$el);
+			
     },
 
     _applyPlacement: function (position) {
