@@ -500,7 +500,7 @@ if (typeof jQuery === 'undefined') {
         this.clear();
         this.$el.show();
         if (this.className) { this.$el.addClass(this.className); }
-        this.completer.fire('textComplete:show');
+        this.completer.fire('textComplete:show', this.$el);
         this.shown = true;
       }
       return this;
@@ -510,7 +510,7 @@ if (typeof jQuery === 'undefined') {
       if (this.shown) {
         this.$el.hide();
         if (this.className) { this.$el.removeClass(this.className); }
-        this.completer.fire('textComplete:hide');
+        this.completer.fire('textComplete:hide', this.$el);
         this.shown = false;
       }
       return this;
