@@ -469,6 +469,8 @@ if (typeof jQuery === 'undefined') {
 
     setPosition: function (pos) {
       this.$el.css(this._applyPlacement(pos));
+			
+			
 
       // Make the dropdown fixed if the input is also fixed
       // This can't be done during init, as textcomplete may be used on multiple elements on the same page
@@ -484,6 +486,9 @@ if (typeof jQuery === 'undefined') {
         }
       });
       this.$el.css({ position: position }); // Update positioning
+			
+			// fire drawn event so we can tweak position ourselves
+			this.completer.fire('textComplete:drawn', this.$el);
 
       return this;
     },
@@ -500,7 +505,7 @@ if (typeof jQuery === 'undefined') {
         this.clear();
         this.$el.show();
         if (this.className) { this.$el.addClass(this.className); }
-        this.completer.fire('textComplete:show', this.$el);
+        this.completer.fire('textComplete:show');
         this.shown = true;
       }
       return this;
@@ -510,7 +515,7 @@ if (typeof jQuery === 'undefined') {
       if (this.shown) {
         this.$el.hide();
         if (this.className) { this.$el.removeClass(this.className); }
-        this.completer.fire('textComplete:hide', this.$el);
+        this.completer.fire('textComplete:hide');
         this.shown = false;
       }
       return this;
