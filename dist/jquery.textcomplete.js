@@ -1186,7 +1186,7 @@ if (typeof jQuery === 'undefined') {
       pre = pre.replace(strategy.match, newSubstr);
       range.selectNodeContents(range.startContainer);
       range.deleteContents();
-      var node = document.createTextNode(pre + post);
+      var node = this.$el[0].ownerDocument.createTextNode(pre + post);
       range.insertNode(node);
       range.setStart(node, pre.length);
       range.collapse(true);
@@ -1208,7 +1208,7 @@ if (typeof jQuery === 'undefined') {
     // Dropdown's position will be decided using the result.
     _getCaretRelativePosition: function () {
       var range = this.$el[0].ownerDocument.getSelection().getRangeAt(0).cloneRange();
-      var node = document.createElement('span');
+      var node = this.$el[0].ownerDocument.createElement('span');
       range.insertNode(node);
       range.selectNodeContents(node);
       range.deleteContents();
