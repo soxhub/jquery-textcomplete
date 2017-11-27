@@ -117,19 +117,27 @@
 
     initialize: function () {
       var element = this.$el.get(0);
-      
+
       // check if we are in an iframe
       // we need to alter positioning logic if using an iframe
       if (this.$el.prop('ownerDocument') !== document && window.frames.length) {
         for (var iframeIndex = 0; iframeIndex < window.frames.length; iframeIndex++) {
-          if (this.$el.prop('ownerDocument') === window.frames[iframeIndex].document) {
-            this.$iframe = $(window.frames[iframeIndex].frameElement);
-            break;
-          }
+		  try {
+			  if (this.$el.prop('ownerDocument') === window.frames[iframeIndex].document) {
+				this.$iframe = $(window.frames[iframeIndex].frameElement);
+				break;
+			  }
+		  }
+		  catch (e) {
+			  // If there are other frames on the current page that belong to a 3rd party,
+			  // a security exception will be thrown when they are accessed in the above
+			  // for loop. This no-op bypasses these exceptions.
+			  // No-op
+		  }
         }
       }
-      
-      
+
+
       // Initialize view objects.
       this.dropdown = new $.fn.textcomplete.Dropdown(element, this, this.option);
       var Adapter, viewName;
