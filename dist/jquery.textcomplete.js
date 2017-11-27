@@ -136,18 +136,15 @@ if (typeof jQuery === 'undefined') {
     return Object.prototype.toString.call(obj) === '[object String]';
   };
 
-  var isFunction = function (obj) {
-    return Object.prototype.toString.call(obj) === '[object Function]';
-  };
-
   var uniqueId = 0;
+  var initializedEditors = [];
 
   function Completer(element, option) {
     this.$el        = $(element);
     this.id         = 'textcomplete' + uniqueId++;
     this.strategies = [];
     this.views      = [];
-    this.option     = $.extend({}, Completer._getDefaults(), option);
+    this.option     = $.extend({}, Completer.defaults, option);
 
     if (!this.$el.is('input[type=text]') && !this.$el.is('input[type=search]') && !this.$el.is('textarea') && !element.isContentEditable && element.contentEditable != 'true') {
       throw new Error('textcomplete must be called on a Textarea or a ContentEditable.');
@@ -161,19 +158,37 @@ if (typeof jQuery === 'undefined') {
       // Initialize view objects lazily.
       var self = this;
       this.$el.one('focus.' + this.id, function () { self.initialize(); });
+
+      // Special handling for CKEditor: lazy init on instance load
+      if ((!this.option.adapter || this.option.adapter == 'CKEditor') && typeof CKEDITOR != 'undefined' && (this.$el.is('textarea'))) {
+        CKEDITOR.on("instanceReady", function(event) { //For multiple ckeditors on one page: this needs to be executed each time a ckeditor-instance is ready.
+
+          if($.inArray(event.editor.id, initializedEditors) == -1) { //For multiple ckeditors on one page: focus-eventhandler should only be added once for every editor.
+            initializedEditors.push(event.editor.id);
+			
+            event.editor.on("focus", function(event2) {
+				//replace the element with the Iframe element and flag it as CKEditor
+				self.$el = $(event.editor.editable().$);
+				if (!self.option.adapter) {
+					self.option.adapter = $.fn.textcomplete['CKEditor'];
+				}
+				self.option.ckeditor_instance = event.editor; //For multiple ckeditors on one page: in the old code this was not executed when adapter was alread set. So we were ALWAYS working with the FIRST instance.
+              	self.initialize();
+            });
+          }
+        });
+      }
     }
   }
 
-  Completer._getDefaults = function () {
-    if (!Completer.DEFAULTS) {
-      Completer.DEFAULTS = {
-        appendTo: $('body'),
-        zIndex: '100'
-      };
-    }
-
-    return Completer.DEFAULTS;
-  }
+  Completer.defaults = {
+    appendTo: 'body',
+    className: '',  // deprecated option
+    dropdownClassName: 'dropdown-menu textcomplete-dropdown',
+    maxCount: 10,
+    zIndex: '100',
+    rightEdgeOffset: 30
+  };
 
   $.extend(Completer.prototype, {
     // Public properties
@@ -296,7 +311,7 @@ if (typeof jQuery === 'undefined') {
         var strategy = this.strategies[i];
         var context = strategy.context(text);
         if (context || context === '') {
-          var matchRegexp = isFunction(strategy.match) ? strategy.match(text) : strategy.match;
+          var matchRegexp = $.isFunction(strategy.match) ? strategy.match(text) : strategy.match;
           if (isString(context)) { text = context; }
           var match = text.match(matchRegexp);
           if (match) { return [strategy, match[strategy.index], match]; }
@@ -414,7 +429,7 @@ if (typeof jQuery === 'undefined') {
       var $parent = option.appendTo;
       if (!($parent instanceof $)) { $parent = $($parent); }
       var $el = $('<ul></ul>')
-        .addClass('dropdown-menu textcomplete-dropdown')
+        .addClass(option.dropdownClassName)
         .attr('id', 'textcomplete-dropdown-' + option._oid)
         .css({
           display: 'none',
@@ -437,7 +452,7 @@ if (typeof jQuery === 'undefined') {
     footer:    null,
     header:    null,
     id:        null,
-    maxCount:  10,
+    maxCount:  null,
     placement: '',
     shown:     false,
     data:      [],     // Shown zipped data.
@@ -460,8 +475,8 @@ if (typeof jQuery === 'undefined') {
 
     render: function (zippedData) {
       var contentsHtml = this._buildContents(zippedData);
-      var unzippedData = $.map(this.data, function (d) { return d.value; });
-      if (this.data.length) {
+      var unzippedData = $.map(zippedData, function (d) { return d.value; });
+      if (zippedData.length) {
         var strategy = zippedData[0].strategy;
         if (strategy.id) {
           this.$el.attr('data-strategy', strategy.id);
@@ -495,7 +510,7 @@ if (typeof jQuery === 'undefined') {
           return false;
         if($(this).css('position') === 'fixed') {
           pos.top -= $window.scrollTop();
-          pos.left -= $window.scrollLeft();					
+          pos.left -= $window.scrollLeft();
           position = 'fixed';
           return false;
         }
@@ -812,7 +827,7 @@ if (typeof jQuery === 'undefined') {
       // to the document width so we don't know if we would have overrun it. As a heuristic to avoid that clipping
       // (which makes our elements wrap onto the next line and corrupt the next item), if we're close to the right
       // edge, move left. We don't know how far to move left, so just keep nudging a bit.
-      var tolerance = 30; // pixels. Make wider than vertical scrollbar because we might not be able to use that space.
+      var tolerance = this.option.rightEdgeOffset; // pixels. Make wider than vertical scrollbar because we might not be able to use that space.
       var lastOffset = this.$el.offset().left, offset;
       var width = this.$el.width();
       var maxLeft = $window.width() - tolerance;
@@ -1023,8 +1038,14 @@ if (typeof jQuery === 'undefined') {
       switch (clickEvent.keyCode) {
         case 9:  // TAB
         case 13: // ENTER
+        case 16: // SHIFT
+        case 17: // CTRL
+        case 18: // ALT
+        case 33: // PAGEUP
+        case 34: // PAGEDOWN
         case 40: // DOWN
         case 38: // UP
+        case 27: // ESC
           return true;
       }
       if (clickEvent.ctrlKey) switch (clickEvent.keyCode) {
@@ -1058,12 +1079,14 @@ if (typeof jQuery === 'undefined') {
       var pre = this.getTextFromHeadToCaret();
       var post = this.el.value.substring(this.el.selectionEnd);
       var newSubstr = strategy.replace(value, e);
+      var regExp;
       if (typeof newSubstr !== 'undefined') {
         if ($.isArray(newSubstr)) {
           post = newSubstr[1] + post;
           newSubstr = newSubstr[0];
         }
-        pre = pre.replace(strategy.match, newSubstr);
+        regExp = $.isFunction(strategy.match) ? strategy.match(pre) : strategy.match;
+        pre = pre.replace(regExp, newSubstr);
         this.$el.val(pre + post);
         this.el.selectionStart = this.el.selectionEnd = pre.length;
       }
@@ -1080,7 +1103,8 @@ if (typeof jQuery === 'undefined') {
       var p = $.fn.textcomplete.getCaretCoordinates(this.el, this.el.selectionStart);
       return {
         top: p.top + this._calculateLineHeight() - this.$el.scrollTop(),
-        left: p.left - this.$el.scrollLeft()
+        left: p.left - this.$el.scrollLeft(),
+        lineHeight: this._calculateLineHeight()
       };
     },
 
@@ -1129,12 +1153,14 @@ if (typeof jQuery === 'undefined') {
       var pre = this.getTextFromHeadToCaret();
       var post = this.el.value.substring(pre.length);
       var newSubstr = strategy.replace(value, e);
+      var regExp;
       if (typeof newSubstr !== 'undefined') {
         if ($.isArray(newSubstr)) {
           post = newSubstr[1] + post;
           newSubstr = newSubstr[0];
         }
-        pre = pre.replace(strategy.match, newSubstr);
+        regExp = $.isFunction(strategy.match) ? strategy.match(pre) : strategy.match;
+        pre = pre.replace(regExp, newSubstr);
         this.$el.val(pre + post);
         this.el.focus();
         var range = this.el.createTextRange();
@@ -1189,12 +1215,15 @@ if (typeof jQuery === 'undefined') {
       var content = selection.toString();
       var post = content.substring(range.startOffset);
       var newSubstr = strategy.replace(value, e);
+      var regExp;
       if (typeof newSubstr !== 'undefined') {
         if ($.isArray(newSubstr)) {
           post = newSubstr[1] + post;
           newSubstr = newSubstr[0];
         }
-        pre = pre.replace(strategy.match, newSubstr);
+        regExp = $.isFunction(strategy.match) ? strategy.match(pre) : strategy.match;
+        pre = pre.replace(regExp, newSubstr)
+            .replace(/ $/, "&nbsp"); // &nbsp necessary at least for CKeditor to not eat spaces
         range.selectNodeContents(range.startContainer);
         range.deleteContents();
         
@@ -1239,10 +1268,12 @@ if (typeof jQuery === 'undefined') {
     // Dropdown's position will be decided using the result.
     _getCaretRelativePosition: function () {
       var range = this.el.ownerDocument.getSelection().getRangeAt(0).cloneRange();
+      var wrapperNode = range.endContainer.parentNode;
       var node = this.el.ownerDocument.createElement('span');
       range.insertNode(node);
       range.selectNodeContents(node);
       range.deleteContents();
+      setTimeout(function() { wrapperNode.normalize(); }, 0);
       var $node = $(node);
       var position = $node.offset();
       position.left -= this.$el.offset().left;
@@ -1255,8 +1286,9 @@ if (typeof jQuery === 'undefined') {
         var iframePosition = this.completer.$iframe.offset();
         position.top += iframePosition.top;
         position.left += iframePosition.left;
-        //subtract scrollTop from element in iframe
-        position.top -= this.$el.scrollTop(); 
+        // We need to get the scrollTop of the html-element inside the iframe and not of the body-element,
+        // because on IE the scrollTop of the body-element (this.$el) is always zero.
+        position.top -= $(this.completer.$iframe[0].contentWindow.document).scrollTop();
       }
       
       $node.remove();
@@ -1280,6 +1312,39 @@ if (typeof jQuery === 'undefined') {
   });
 
   $.fn.textcomplete.ContentEditable = ContentEditable;
+}(jQuery);
+
+// NOTE: TextComplete plugin has contenteditable support but it does not work
+//       fine especially on old IEs.
+//       Any pull requests are REALLY welcome.
+
++function ($) {
+  'use strict';
+
+  // CKEditor adapter
+  // =======================
+  //
+  // Adapter for CKEditor, based on contenteditable elements.
+  function CKEditor (element, completer, option) {
+    this.initialize(element, completer, option);
+  }
+
+  $.extend(CKEditor.prototype, $.fn.textcomplete.ContentEditable.prototype, {
+    _bindEvents: function () {
+      var $this = this;
+      this.option.ckeditor_instance.on('key', function(event) {
+        var domEvent = event.data;
+        $this._onKeyup(domEvent);
+        if ($this.completer.dropdown.shown && $this._skipSearch(domEvent)) {
+          return false;
+        }
+      }, null, null, 1); // 1 = Priority = Important!
+      // we actually also need the native event, as the CKEditor one is happening to late
+      this.$el.on('keyup.' + this.id, $.proxy(this._onKeyup, this));
+    },
+});
+
+  $.fn.textcomplete.CKEditor = CKEditor;
 }(jQuery);
 
 // The MIT License (MIT)

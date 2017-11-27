@@ -116,8 +116,14 @@
       switch (clickEvent.keyCode) {
         case 9:  // TAB
         case 13: // ENTER
+        case 16: // SHIFT
+        case 17: // CTRL
+        case 18: // ALT
+        case 33: // PAGEUP
+        case 34: // PAGEDOWN
         case 40: // DOWN
         case 38: // UP
+        case 27: // ESC
           return true;
       }
       if (clickEvent.ctrlKey) switch (clickEvent.keyCode) {

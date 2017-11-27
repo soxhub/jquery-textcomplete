@@ -18,12 +18,14 @@
       var pre = this.getTextFromHeadToCaret();
       var post = this.el.value.substring(this.el.selectionEnd);
       var newSubstr = strategy.replace(value, e);
+      var regExp;
       if (typeof newSubstr !== 'undefined') {
         if ($.isArray(newSubstr)) {
           post = newSubstr[1] + post;
           newSubstr = newSubstr[0];
         }
-        pre = pre.replace(strategy.match, newSubstr);
+        regExp = $.isFunction(strategy.match) ? strategy.match(pre) : strategy.match;
+        pre = pre.replace(regExp, newSubstr);
         this.$el.val(pre + post);
         this.el.selectionStart = this.el.selectionEnd = pre.length;
       }
@@ -40,7 +42,8 @@
       var p = $.fn.textcomplete.getCaretCoordinates(this.el, this.el.selectionStart);
       return {
         top: p.top + this._calculateLineHeight() - this.$el.scrollTop(),
-        left: p.left - this.$el.scrollLeft()
+        left: p.left - this.$el.scrollLeft(),
+        lineHeight: this._calculateLineHeight()
       };
     },
 

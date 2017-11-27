@@ -8,6 +8,73 @@ This change log adheres to [keepachangelog.com](http://keepachangelog.com).
 
 ## [Unreleased]
 
+## [1.8.4] - 2017-08-29
+### Fixed
+- On IE: Correct alignment of jquery-textcomplete-dropdown when scrolling down in iframe ([#310](https://github.com/yuku-t/jquery-textcomplete/pull/310))
+
+## [1.8.3] - 2017-08-29
+### Fixed
+- Fix splitting text nodes when moving caret in contenteditable ([#311](https://github.com/yuku-t/jquery-textcomplete/pull/311))
+
+## [1.8.2] - 2017-07-11
+### Fixed
+- Fix for multiple ckeditors ([#309](https://github.com/yuku-t/jquery-textcomplete/pull/309))
+
+## [1.8.1] - 2017-06-27
+### Fixed
+- Attach textcomplete to the active CKEditor only ([#294](https://github.com/yuku-t/jquery-textcomplete/pull/294))
+
+## [1.8.0] - 2016-11-15
+### Added
+- Skip search after pressing shift, ctrl, alt, pageup and pagedown keys ([#292](https://github.com/yuku-t/jquery-textcomplete/pull/292))
+
+## [1.7.3] - 2016-09-20
+### Fixed
+- Remove dependency on Redmine / issue_notes undefined ([#288](https://github.com/yuku-t/jquery-textcomplete/pull/288))
+
+## [1.7.2] - 2016-09-12
+### Fixed
+- Fixed issue #258 Control gets stuck when callback function triggered with empty array ([#261](https://github.com/yuku-t/jquery-textcomplete/pull/261))
+
+## [1.7.1] - 2016-08-29
+### Added
+- Build dist files
+
+## [1.7.0] - 2016-08-29
+### Added
+- Add `rightEdgeOffset` option ([#281](https://github.com/yuku-t/jquery-textcomplete/pull/281))
+
+## [1.6.3] - 2016-08-26
+### Fixed
+- Reverts v1.6.2 ([#284](https://github.com/yuku-t/jquery-textcomplete/pull/284))
+
+## [1.6.2] - 2016-07-08
+### Fixed
+- Fix dropdown showing out of viewport ([#262](https://github.com/yuku-t/jquery-textcomplete/pull/262))
+
+## [1.6.1] - 2016-07-08
+### Fixed
+- Support for match functions in select phase ([#272](https://github.com/yuku-t/jquery-textcomplete/pull/272))
+
+## [1.6.0] - 2016-06-28
+### Added
+- Don't search on Esc key ([#269](https://github.com/yuku-t/jquery-textcomplete/pull/269))
+
+### Fixed
+- Set lineheight for textareas ([#263](https://github.com/yuku-t/jquery-textcomplete/pull/263))
+
+## [1.5.0] - 2016-06-07
+### Added
+- Add dropdownClassName option
+
+## [1.4.0] - 2016-06-01
+### Added
+- Add CKEditor adapter ([#253](https://github.com/yuku-t/jquery-textcomplete/pull/253)
+
+## [1.3.5] - 2016-05-27
+### Fixed
+- better support for contenteditables in iframes (ckeditor, tinymce, etc) ([#252](https://github.com/yuku-t/jquery-textcomplete/pull/252))
+
 ## [1.3.4] - 2016-04-20
 ### Fixed
 - Fix endless loop when RTL ([#247](https://github.com/yuku-t/jquery-textcomplete/pull/247))
@@ -287,7 +354,23 @@ This change log adheres to [keepachangelog.com](http://keepachangelog.com).
 ### Added
 - Initial release.
 
-[Unreleased]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.3.4...HEAD
+[Unreleased]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.8.4...HEAD
+[1.8.4]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.8.3...v1.8.4
+[1.8.3]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.8.2...v1.8.3
+[1.8.2]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.8.1...v1.8.2
+[1.8.1]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.8.0...v1.8.1
+[1.8.0]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.7.3...v1.8.0
+[1.7.3]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.7.2...v1.7.3
+[1.7.2]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.7.1...v1.7.2
+[1.7.1]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.7.0...v1.7.1
+[1.7.0]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.6.3...v1.7.0
+[1.6.3]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.6.2...v1.6.3
+[1.6.2]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.6.1...v1.6.2
+[1.6.1]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.6.0...v1.6.1
+[1.6.0]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.3.5...v1.4.0
+[1.3.5]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.3.4...v1.3.5
 [1.3.4]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/yuku-t/jquery-textcomplete/compare/v1.3.1...v1.3.2

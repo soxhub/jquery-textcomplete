@@ -69,7 +69,7 @@
       var $parent = option.appendTo;
       if (!($parent instanceof $)) { $parent = $($parent); }
       var $el = $('<ul></ul>')
-        .addClass('dropdown-menu textcomplete-dropdown')
+        .addClass(option.dropdownClassName)
         .attr('id', 'textcomplete-dropdown-' + option._oid)
         .css({
           display: 'none',
@@ -92,7 +92,7 @@
     footer:    null,
     header:    null,
     id:        null,
-    maxCount:  10,
+    maxCount:  null,
     placement: '',
     shown:     false,
     data:      [],     // Shown zipped data.
@@ -115,8 +115,8 @@
 
     render: function (zippedData) {
       var contentsHtml = this._buildContents(zippedData);
-      var unzippedData = $.map(this.data, function (d) { return d.value; });
-      if (this.data.length) {
+      var unzippedData = $.map(zippedData, function (d) { return d.value; });
+      if (zippedData.length) {
         var strategy = zippedData[0].strategy;
         if (strategy.id) {
           this.$el.attr('data-strategy', strategy.id);
@@ -150,7 +150,7 @@
           return false;
         if($(this).css('position') === 'fixed') {
           pos.top -= $window.scrollTop();
-          pos.left -= $window.scrollLeft();					
+          pos.left -= $window.scrollLeft();
           position = 'fixed';
           return false;
         }
@@ -467,7 +467,7 @@
       // to the document width so we don't know if we would have overrun it. As a heuristic to avoid that clipping
       // (which makes our elements wrap onto the next line and corrupt the next item), if we're close to the right
       // edge, move left. We don't know how far to move left, so just keep nudging a bit.
-      var tolerance = 30; // pixels. Make wider than vertical scrollbar because we might not be able to use that space.
+      var tolerance = this.option.rightEdgeOffset; // pixels. Make wider than vertical scrollbar because we might not be able to use that space.
       var lastOffset = this.$el.offset().left, offset;
       var width = this.$el.width();
       var maxLeft = $window.width() - tolerance;

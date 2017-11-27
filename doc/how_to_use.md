@@ -122,18 +122,20 @@ The `option` is an optional Object which MAY have `appendTo`, `height` , `maxCou
 
 ```js
 var option = {
-  appendTo:  appendToElement, // $('body')
-  height:    heightNumber,    // undefined
-  maxCount:  maxCountNumber,  // 10
-  placement: placementStr,    // ''
-  header:    headerStrOrFunc, // undefined
-  footer:    footerStrOrFunc, // undefined
-  zIndex:    zIndexStr,       // '100'
-  debounce:  debounceNumber,  // undefined
-  adapter:   adapterClass,    // undefined
-  className: classNameStr,    // ''
-  onKeydown: onKeydownFunc,   // undefined
-  noResultsMessage: noResultsMessageStrOrFunc  // undefined
+  adapter:           adapterClass,              // undefined
+  appendTo:          appendToString,            // 'body'
+  className:         classNameStr,              // DEPRECATED ''
+  debounce:          debounceNumber,            // undefined
+  dropdownClassName: dropdownClassNameStr,      // 'dropdown-menu textcomplete-dropdown'
+  footer:            footerStrOrFunc,           // undefined
+  header:            headerStrOrFunc,           // undefined
+  height:            heightNumber,              // undefined
+  maxCount:          maxCountNumber,            // 10
+  noResultsMessage:  noResultsMessageStrOrFunc, // undefined
+  onKeydown:         onKeydownFunc,             // undefined
+  placement:         placementStr,              // ''
+  rightEdgeOffset:   rightEdgeOffsetInteger,    // 30
+  zIndex:            zIndexStr,                 // '100'
 };
 ```
 
@@ -141,7 +143,7 @@ The `maxCountNumber` MUST be a Number and default to 10. Even if `searchFunc` ca
 
 If `placementStr` includes 'top', it positions the drop-down to above the caret. If `placementStr` includes 'absleft' and 'absright', it positions the drop-down absolutely to the very left and right respectively. You can mix them.
 
-You can override the z-index property and the class attribute of dropdown element using `zIndex` and `className` option respectively.
+You can override the z-index property and the class attribute of dropdown element using `zIndex` and `dropdownClassName` option respectively.
 
 If you want to add some additional keyboard shortcut, set a function to `onKeydown` option. The function will be called with two arguments, the keydown event and commands hash.
 

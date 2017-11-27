@@ -61,18 +61,15 @@
     return Object.prototype.toString.call(obj) === '[object String]';
   };
 
-  var isFunction = function (obj) {
-    return Object.prototype.toString.call(obj) === '[object Function]';
-  };
-
   var uniqueId = 0;
+  var initializedEditors = [];
 
   function Completer(element, option) {
     this.$el        = $(element);
     this.id         = 'textcomplete' + uniqueId++;
     this.strategies = [];
     this.views      = [];
-    this.option     = $.extend({}, Completer._getDefaults(), option);
+    this.option     = $.extend({}, Completer.defaults, option);
 
     if (!this.$el.is('input[type=text]') && !this.$el.is('input[type=search]') && !this.$el.is('textarea') && !element.isContentEditable && element.contentEditable != 'true') {
       throw new Error('textcomplete must be called on a Textarea or a ContentEditable.');
@@ -86,19 +83,37 @@
       // Initialize view objects lazily.
       var self = this;
       this.$el.one('focus.' + this.id, function () { self.initialize(); });
+
+      // Special handling for CKEditor: lazy init on instance load
+      if ((!this.option.adapter || this.option.adapter == 'CKEditor') && typeof CKEDITOR != 'undefined' && (this.$el.is('textarea'))) {
+        CKEDITOR.on("instanceReady", function(event) { //For multiple ckeditors on one page: this needs to be executed each time a ckeditor-instance is ready.
+
+          if($.inArray(event.editor.id, initializedEditors) == -1) { //For multiple ckeditors on one page: focus-eventhandler should only be added once for every editor.
+            initializedEditors.push(event.editor.id);
+			
+            event.editor.on("focus", function(event2) {
+				//replace the element with the Iframe element and flag it as CKEditor
+				self.$el = $(event.editor.editable().$);
+				if (!self.option.adapter) {
+					self.option.adapter = $.fn.textcomplete['CKEditor'];
+				}
+				self.option.ckeditor_instance = event.editor; //For multiple ckeditors on one page: in the old code this was not executed when adapter was alread set. So we were ALWAYS working with the FIRST instance.
+              	self.initialize();
+            });
+          }
+        });
+      }
     }
   }
 
-  Completer._getDefaults = function () {
-    if (!Completer.DEFAULTS) {
-      Completer.DEFAULTS = {
-        appendTo: $('body'),
-        zIndex: '100'
-      };
-    }
-
-    return Completer.DEFAULTS;
-  }
+  Completer.defaults = {
+    appendTo: 'body',
+    className: '',  // deprecated option
+    dropdownClassName: 'dropdown-menu textcomplete-dropdown',
+    maxCount: 10,
+    zIndex: '100',
+    rightEdgeOffset: 30
+  };
 
   $.extend(Completer.prototype, {
     // Public properties
@@ -221,7 +236,7 @@
         var strategy = this.strategies[i];
         var context = strategy.context(text);
         if (context || context === '') {
-          var matchRegexp = isFunction(strategy.match) ? strategy.match(text) : strategy.match;
+          var matchRegexp = $.isFunction(strategy.match) ? strategy.match(text) : strategy.match;
           if (isString(context)) { text = context; }
           var match = text.match(matchRegexp);
           if (match) { return [strategy, match[strategy.index], match]; }

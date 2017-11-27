@@ -30,12 +30,15 @@
       var content = selection.toString();
       var post = content.substring(range.startOffset);
       var newSubstr = strategy.replace(value, e);
+      var regExp;
       if (typeof newSubstr !== 'undefined') {
         if ($.isArray(newSubstr)) {
           post = newSubstr[1] + post;
           newSubstr = newSubstr[0];
         }
-        pre = pre.replace(strategy.match, newSubstr);
+        regExp = $.isFunction(strategy.match) ? strategy.match(pre) : strategy.match;
+        pre = pre.replace(regExp, newSubstr)
+            .replace(/ $/, "&nbsp"); // &nbsp necessary at least for CKeditor to not eat spaces
         range.selectNodeContents(range.startContainer);
         range.deleteContents();
         
@@ -80,10 +83,12 @@
     // Dropdown's position will be decided using the result.
     _getCaretRelativePosition: function () {
       var range = this.el.ownerDocument.getSelection().getRangeAt(0).cloneRange();
+      var wrapperNode = range.endContainer.parentNode;
       var node = this.el.ownerDocument.createElement('span');
       range.insertNode(node);
       range.selectNodeContents(node);
       range.deleteContents();
+      setTimeout(function() { wrapperNode.normalize(); }, 0);
       var $node = $(node);
       var position = $node.offset();
       position.left -= this.$el.offset().left;
@@ -96,8 +101,9 @@
         var iframePosition = this.completer.$iframe.offset();
         position.top += iframePosition.top;
         position.left += iframePosition.left;
-        //subtract scrollTop from element in iframe
-        position.top -= this.$el.scrollTop(); 
+        // We need to get the scrollTop of the html-element inside the iframe and not of the body-element,
+        // because on IE the scrollTop of the body-element (this.$el) is always zero.
+        position.top -= $(this.completer.$iframe[0].contentWindow.document).scrollTop();
       }
       
       $node.remove();
