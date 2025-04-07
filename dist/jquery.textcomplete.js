@@ -541,12 +541,19 @@ if (typeof jQuery === 'undefined') {
 
     deactivate: function () {
       if (this.shown) {
-        this.$el.hide();
-        if (this.className) { this.$el.removeClass(this.className); }
-        this.completer.fire('textComplete:hide');
-        this.shown = false;
+        var self = this;
+        setTimeout(function () {
+          self.$el.hide();
+          if (self.className) {
+            self.$el.removeClass(self.className);
+          }
+          self.completer.fire("textComplete:hide");
+          self.shown = false;
+        }, 0);
+        return self;
+      } else {
+        return this;
       }
-      return this;
     },
 
     isUp: function (e) {
